@@ -39,6 +39,7 @@
 </script>
 
 <style>
+  
   :root {
     --gold: oklch(0.82 0.16 88);
     --gold-soft: oklch(0.9 0.13 92);
@@ -86,6 +87,49 @@
   #contact-form select option {
     color: #000;
   }
+
+  /* Inline field validation (Facebook/enterprise style) */
+  #contact-form .field-error {
+    display: none;
+    align-items: flex-start;
+    gap: 6px;
+    margin-top: 7px;
+    font-size: 12.5px;
+    line-height: 1.4;
+    color: oklch(0.7 0.22 25);
+  }
+  #contact-form .field-error.visible {
+    display: flex;
+    animation: errorIn .18s ease-out;
+  }
+  #contact-form .field-error svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  @keyframes errorIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  #contact-form input.input-error,
+  #contact-form select.input-error,
+  #contact-form textarea.input-error {
+    border-color: oklch(0.7 0.22 25) !important;
+    box-shadow: 0 0 0 1px oklch(0.7 0.22 25 / 0.6);
+    animation: shakeError .3s ease-in-out;
+  }
+  #contact-form input.input-valid,
+  #contact-form select.input-valid,
+  #contact-form textarea.input-valid {
+    border-color: oklch(0.6 0.15 155) !important;
+  }
+  @keyframes shakeError {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+  }
+  #contact-form .field-wrap { position: relative; }
   /* Phone input (intl-tel-input) — match width/height of other fields, left-align everything */
 .iti {
   width: 100%;
@@ -344,51 +388,64 @@
 <div class="space-y-5">
 
 <!-- First Name -->
-<div>
-<label class="mb-2 block text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
+<div class="field-wrap">
+<label for="first_name" class="mb-2 block text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
 First Name
 </label>
 <input
 type="text"
+id="first_name"
 name="first_name"
 required
 maxlength="100"
+autocomplete="given-name"
+aria-describedby="first_name-error"
 class="w-full rounded-lg border border-border bg-pond-deep/50 px-4 py-3 text-foreground outline-none focus:border-gold">
+<p id="first_name-error" class="field-error" role="alert"></p>
 </div>
 
 <!-- Last Name -->
-<div>
-<label class="mb-2 block text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
+<div class="field-wrap">
+<label for="last_name" class="mb-2 block text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
 Last Name
 </label>
 <input
 type="text"
+id="last_name"
 name="last_name"
 required
 maxlength="100"
+autocomplete="family-name"
+aria-describedby="last_name-error"
 class="w-full rounded-lg border border-border bg-pond-deep/50 px-4 py-3 text-foreground outline-none focus:border-gold">
+<p id="last_name-error" class="field-error" role="alert"></p>
 </div>
 
 <!-- Email -->
-<div>
-<label class="mb-2 block text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
+<div class="field-wrap">
+<label for="email" class="mb-2 block text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
 Email Address
 </label>
 <input
 type="email"
+id="email"
 name="email"
 required
+autocomplete="email"
 placeholder="example@email.com"
+aria-describedby="email-error"
 class="w-full rounded-lg border border-border bg-pond-deep/50 px-4 py-3 text-foreground outline-none focus:border-gold">
+<p id="email-error" class="field-error" role="alert"></p>
 </div>
 
 <!-- Phone -->
-<div>
-  <label class="mb-2 block text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
+<div class="field-wrap">
+  <label for="phone" class="mb-2 block text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
     Phone Number
   </label>
-  <input type="tel" id="phone" name="phone" required
+  <input type="tel" id="phone" name="phone" required autocomplete="tel" aria-describedby="phone-error"
     class="w-full rounded-lg border border-border bg-pond-deep/50 px-4 py-3 text-foreground outline-none focus:border-gold">
+  <p id="phone-error" class="field-error" role="alert"></p>
 </div>
 
 <!-- Business -->
@@ -403,14 +460,16 @@ class="w-full rounded-lg border border-border bg-pond-deep/50 px-4 py-3 text-for
 </div>
 
 <!-- Budget -->
-<div>
-<label class="mb-2 block text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-Budget(Optional)
+<div class="field-wrap">
+<label for="budget" class="mb-2 block text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
+Budget
 </label>
 
 <select
+id="budget"
 name="budget"
 required
+aria-describedby="budget-error"
 class="w-full rounded-lg border border-border bg-pond-deep/50 px-4 py-3 text-foreground outline-none focus:border-gold">
 
 <option value="">Select Budget</option>
@@ -419,6 +478,7 @@ class="w-full rounded-lg border border-border bg-pond-deep/50 px-4 py-3 text-for
 <option value="₱3,000+">₱3,000+</option>
 
 </select>
+<p id="budget-error" class="field-error" role="alert"></p>
 </div>
 
 <!-- Preferred Color -->
@@ -473,18 +533,20 @@ class="w-full rounded-lg border border-border bg-pond-deep/50 px-4 py-3">
 </div>
 
 <!-- Message -->
-<div>
-<label class="mb-2 block text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
+<div class="field-wrap">
+<label for="message" class="mb-2 block text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
 Message
 </label>
 
 <textarea
+id="message"
 name="message"
 required
 maxlength="1000"
 rows="6"
+aria-describedby="message-error"
 class="w-full resize-none rounded-lg border border-border bg-pond-deep/50 px-4 py-3 text-foreground outline-none focus:border-gold"></textarea>
-
+<p id="message-error" class="field-error" role="alert"></p>
 </div>
 
 <button
@@ -647,29 +709,121 @@ style="background: var(--gradient-gold)">
   document.getElementById('thank-you-close').addEventListener('click', () => { tyModal.style.display = 'none'; });
   tyModal.addEventListener('click', (e) => { if (e.target === tyModal) tyModal.style.display = 'none'; });
 
-  // Validation
-  function validateForm(data) {
-    const errors = {};
+  // ---- Inline field validation (Facebook / enterprise style) ----
+  const contactForm = document.getElementById('contact-form');
+  const ERROR_ICON = '<svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10A8 8 0 1 1 2 10a8 8 0 0 1 16 0Zm-7-4a1 1 0 1 0-2 0v4a1 1 0 1 0 2 0V6Zm-1 7a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5Z" clip-rule="evenodd"/></svg>';
 
-    if (!data.firstName.trim()) errors.first_name = "First name is required";
-    if (!data.lastName.trim()) errors.last_name = "Last name is required";
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email.trim())) {
-      errors.email = "Enter a valid email address";
-    }
-    if (!iti.isValidNumber()) errors.phone = "Enter a valid phone number";
-    if (data.message.trim().length < 10) {
-      errors.message = "Message should be at least 10 characters";
-    }
+  // Rules: each returns an error string, or '' if the field is valid
+  const fieldRules = {
+    first_name: () => contactForm.first_name.value.trim() ? '' : 'First name is required',
+    last_name: () => contactForm.last_name.value.trim() ? '' : 'Last name is required',
+    email: () => {
+      const v = contactForm.email.value.trim();
+      if (!v) return 'Email address is required';
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return 'Enter a valid email address, like name@example.com';
+      return '';
+    },
+    phone: () => {
+      if (!phoneInput.value.trim()) return 'Phone number is required';
+      if (!iti.isValidNumber()) return 'Enter a valid phone number for the selected country';
+      return '';
+    },
+    budget: () => contactForm.budget.value ? '' : 'Please select a budget range',
+    message: () => {
+      const v = contactForm.message.value.trim();
+      if (!v) return "Please tell us a little about your pond";
+      if (v.length < 10) return 'Message should be at least 10 characters';
+      return '';
+    },
+  };
 
-    return errors;
+  const touched = new Set();
+
+  function getFieldEl(name) {
+    return name === 'phone' ? phoneInput : contactForm[name];
+  }
+
+  function setFieldError(name, message) {
+    const errorEl = document.getElementById(name + '-error');
+    const fieldEl = getFieldEl(name);
+    if (!errorEl || !fieldEl) return;
+
+    if (message) {
+      errorEl.innerHTML = ERROR_ICON + '<span>' + message + '</span>';
+      errorEl.classList.add('visible');
+      fieldEl.classList.add('input-error');
+      fieldEl.classList.remove('input-valid');
+      fieldEl.setAttribute('aria-invalid', 'true');
+    } else {
+      errorEl.classList.remove('visible');
+      errorEl.innerHTML = '';
+      fieldEl.classList.remove('input-error');
+      fieldEl.removeAttribute('aria-invalid');
+      if (touched.has(name)) fieldEl.classList.add('input-valid');
+    }
+  }
+
+  function validateField(name) {
+    const message = fieldRules[name] ? fieldRules[name]() : '';
+    setFieldError(name, message);
+    return !message;
+  }
+
+  function validateAll() {
+    return Object.keys(fieldRules)
+      .map((name) => ({ name, valid: validateField(name) }))
+      .every((r) => r.valid);
+  }
+
+  Object.keys(fieldRules).forEach((name) => {
+    const el = getFieldEl(name);
+    if (!el) return;
+
+    // Validate as soon as the user leaves a field (first pass, like Facebook)
+    el.addEventListener('blur', () => {
+      touched.add(name);
+      validateField(name);
+    });
+
+    // Once a field has been touched, re-validate live so the error
+    // clears the moment it's fixed instead of waiting for another blur
+    const liveEvent = (el.tagName === 'SELECT') ? 'change' : 'input';
+    el.addEventListener(liveEvent, () => {
+      if (touched.has(name)) validateField(name);
+    });
+  });
+
+  // Phone: also re-check when the user changes the country code
+  phoneInput.addEventListener('countrychange', () => {
+    if (touched.has('phone')) validateField('phone');
+  });
+
+  function focusFirstInvalidField() {
+    const firstInvalidName = Object.keys(fieldRules).find((name) => !!fieldRules[name]());
+    if (!firstInvalidName) return;
+    const el = getFieldEl(firstInvalidName);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.focus({ preventScroll: true });
+    }
   }
 
   // Form submit
-  document.getElementById('contact-form').addEventListener('submit', async (e) => {
+  contactForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const form = e.target;
     const t = document.getElementById('submit-text');
     const submitBtn = document.getElementById('submit-btn');
+
+    Object.keys(fieldRules).forEach((name) => touched.add(name));
+    const allValid = validateAll();
+
+    if (!allValid) {
+      focusFirstInvalidField();
+      t.textContent = 'Please fix the highlighted fields';
+      setTimeout(() => { t.textContent = 'Send Message'; }, 3000);
+      return;
+    }
 
     const data = {
       firstName: form.first_name.value,
@@ -684,12 +838,6 @@ style="background: var(--gradient-gold)">
       message: form.message.value
     };
 
-    const errors = validateForm(data);
-    if (Object.keys(errors).length > 0) {
-      t.textContent = Object.values(errors)[0];
-      return;
-    }
-
     submitBtn.disabled = true;
     t.textContent = 'Sending...';
 
@@ -703,6 +851,11 @@ style="background: var(--gradient-gold)">
       if (res.ok) {
         t.textContent = 'Message Sent — Salamat!';
         form.reset();
+        touched.clear();
+        Object.keys(fieldRules).forEach((name) => {
+          const el = getFieldEl(name);
+          if (el) el.classList.remove('input-valid', 'input-error');
+        });
         document.getElementById('thank-you-modal').style.display = 'grid';
       } else {
         t.textContent = 'Something went wrong — try again';
