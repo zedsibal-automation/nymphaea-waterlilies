@@ -72,7 +72,6 @@
   @keyframes fadeUp { from { opacity:0; transform: translateY(24px);} to { opacity:1; transform: translateY(0);} }
 
   .ripple:hover { box-shadow: 0 0 0 1px var(--accent, var(--gold)), 0 30px 60px -20px oklch(0.82 0.16 88 / 0.5); transition: box-shadow .5s, transform .5s; }
-.ripple:hover { box-shadow: 0 0 0 1px var(--accent, var(--gold)), 0 30px 60px -20px oklch(0.82 0.16 88 / 0.5); transition: box-shadow .5s, transform .5s; }
 
   /* Form fields: force black input text/values, keep dark field background */
   #contact-form input,
@@ -87,7 +86,6 @@
   #contact-form select option {
     color: #000;
   }
-</style>
 </style>
 </head>
 <body class="text-foreground">
@@ -511,7 +509,16 @@ style="background: var(--gradient-gold)">
 </div>
 
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@23/build/js/intlTelInput.min.js"></script>
 <script>
+  // Phone input (country dropdown) — must be initialized before validateForm/submit use it
+  const phoneInput = document.querySelector("#phone");
+  const iti = window.intlTelInput(phoneInput, {
+    initialCountry: "ph",              // defaults to Philippines since that's your market
+    preferredCountries: ["ph", "us", "au", "sg"],
+    utilsScript: "https://cdn.jsdelivr.net/npm/intl-tel-input@23/build/js/utils.js"
+  });
+
   const varieties = [
     { name:"Supranee Pink", tag:"Hardy Day Blooming", price:"₱2,199", img:"images/collection-5.jpg", accent:"oklch(0.65 0.28 350)", free:true },
     { name:"Crimson Fire", tag:"Hardy Day Blooming", price:"₱3,899", img:"images/collection-3.jpg", accent:"oklch(0.55 0.24 20)", free:true },
@@ -586,7 +593,24 @@ style="background: var(--gradient-gold)">
   document.getElementById('thank-you-close').addEventListener('click', () => { tyModal.style.display = 'none'; });
   tyModal.addEventListener('click', (e) => { if (e.target === tyModal) tyModal.style.display = 'none'; });
 
-  // Form
+  // Validation
+  function validateForm(data) {
+    const errors = {};
+
+    if (!data.firstName.trim()) errors.first_name = "First name is required";
+    if (!data.lastName.trim()) errors.last_name = "Last name is required";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email.trim())) {
+      errors.email = "Enter a valid email address";
+    }
+    if (!iti.isValidNumber()) errors.phone = "Enter a valid phone number";
+    if (data.message.trim().length < 10) {
+      errors.message = "Message should be at least 10 characters";
+    }
+
+    return errors;
+  }
+
+  // Form submit
   document.getElementById('contact-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const form = e.target;
@@ -597,7 +621,7 @@ style="background: var(--gradient-gold)">
       firstName: form.first_name.value,
       lastName: form.last_name.value,
       email: form.email.value,
-      phone: form.phone.value,
+      phone: iti.getNumber(),
       businessName: form.business_name.value,
       budget: form.budget.value,
       preferredColor: form.preferred_color.value,
@@ -605,6 +629,12 @@ style="background: var(--gradient-gold)">
       deliveryProvince: form.delivery_province.value,
       message: form.message.value
     };
+
+    const errors = validateForm(data);
+    if (Object.keys(errors).length > 0) {
+      t.textContent = Object.values(errors)[0];
+      return;
+    }
 
     submitBtn.disabled = true;
     t.textContent = 'Sending...';
@@ -642,15 +672,6 @@ style="background: var(--gradient-gold)">
   document.querySelectorAll('[data-reveal]').forEach(el => io.observe(el));
 
   lucide.createIcons();
-</script>
-      <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@23/build/js/intlTelInput.min.js"></script>
-<script>
-  const phoneInput = document.querySelector("#phone");
-  const iti = window.intlTelInput(phoneInput, {
-    initialCountry: "ph",              // defaults to Philippines since that's your market
-    preferredCountries: ["ph", "us", "au", "sg"],
-    utilsScript: "https://cdn.jsdelivr.net/npm/intl-tel-input@23/build/js/utils.js"
-  });
 </script>
 </body>
 </html>
