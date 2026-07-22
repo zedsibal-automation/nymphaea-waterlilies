@@ -86,6 +86,60 @@
   #contact-form select option {
     color: #000;
   }
+  /* Phone input (intl-tel-input) — match width/height of other fields, left-align everything */
+.iti {
+  width: 100%;
+  display: block;
+}
+.iti input {
+  width: 100%;
+  text-align: left;
+}
+.iti__flag-container {
+  display: flex;
+  align-items: center;
+}
+.iti__selected-flag {
+  padding: 0 10px;
+}
+.iti__country-list {
+  background: var(--pond-deep);
+  border: 1px solid var(--gold);
+  border-radius: 0.5rem;
+  color: #fff;
+  max-height: 220px;
+  text-align: left;
+}
+.iti__country {
+  display: flex;
+  align-items: center;
+  text-align: left;
+  color: #fff;
+  padding: 8px 12px;
+}
+.iti__country-name,
+.iti__dial-code {
+  text-align: left;
+}
+.iti__country:hover,
+.iti__country.iti__highlight {
+  background: oklch(0.82 0.16 88 / 0.15);
+}
+.iti__dial-code {
+  color: oklch(0.75 0.02 100);
+  margin-left: 6px;
+}
+.iti__search-input {
+  background: var(--pond-deep);
+  color: #fff;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  padding: 8px 10px;
+  text-align: left;
+}
+.iti__divider {
+  border-bottom: 1px solid var(--border);
+}
 </style>
 </head>
 <body class="text-foreground">
