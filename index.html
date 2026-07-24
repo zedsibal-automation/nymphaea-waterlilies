@@ -520,14 +520,17 @@ class="w-full rounded-lg border border-border bg-pond-deep/50 px-4 py-3 text-for
 </div>
 
 <!-- Preferred Color -->
-<div>
-<label class="mb-2 block text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-Preferred Water Lily Color(Optional)
+<div class="field-wrap">
+<label for="preferred_color" class="mb-2 block text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
+Preferred Water Lily Color
 </label>
 
 <select
+id="preferred_color"
 name="preferred_color"
-class="w-full rounded-lg border border-border bg-pond-deep/50 px-4 py-3">
+required
+aria-describedby="preferred_color-error"
+class="w-full rounded-lg border border-border bg-pond-deep/50 px-4 py-3 text-foreground outline-none focus:border-gold">
 
 <option value="">Select Color</option>
 <option>Blue</option>
@@ -539,16 +542,20 @@ class="w-full rounded-lg border border-border bg-pond-deep/50 px-4 py-3">
   <option>Other</option>
 
 </select>
+<p id="preferred_color-error" class="field-error" role="alert"></p>
 </div>
 
 <!-- Pond Size -->
-<div>
-<label class="mb-2 block text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-Pond Size(Optional)
+<div class="field-wrap">
+<label for="pond_size" class="mb-2 block text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
+Pond Size
 </label>
 <select
+id="pond_size"
 name="pond_size"
-class="w-full rounded-lg border border-border bg-pond-deep/50 px-4 py-3">
+required
+aria-describedby="pond_size-error"
+class="w-full rounded-lg border border-border bg-pond-deep/50 px-4 py-3 text-foreground outline-none focus:border-gold">
 
 <option value="">Select pond-size</option>
 <option>Small tub</option>
@@ -556,18 +563,23 @@ class="w-full rounded-lg border border-border bg-pond-deep/50 px-4 py-3">
 <option>large Koi pond</option>
 
 </select>
+<p id="pond_size-error" class="field-error" role="alert"></p>
 </div>
 
 <!-- Province -->
-<div>
-<label class="mb-2 block text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-Delivery Province(Optional)
+<div class="field-wrap">
+<label for="delivery_province" class="mb-2 block text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
+Delivery Province
 </label>
 
 <input
+id="delivery_province"
 name="delivery_province"
+required
+aria-describedby="delivery_province-error"
 placeholder="Example: Tarlac"
-class="w-full rounded-lg border border-border bg-pond-deep/50 px-4 py-3">
+class="w-full rounded-lg border border-border bg-pond-deep/50 px-4 py-3 text-foreground outline-none focus:border-gold">
+<p id="delivery_province-error" class="field-error" role="alert"></p>
 </div>
 
 <!-- Message -->
@@ -753,6 +765,41 @@ style="background: var(--gradient-gold)">
   const contactForm = document.getElementById('contact-form');
   const ERROR_ICON = '<svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10A8 8 0 1 1 2 10a8 8 0 0 1 16 0Zm-7-4a1 1 0 1 0-2 0v4a1 1 0 1 0 2 0V6Zm-1 7a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5Z" clip-rule="evenodd"/></svg>';
 
+  // Known real email providers, used to catch typos like "gmal.com" or "yaho.com".
+  // This is the same technique tools like Mailcheck.js (used by HubSpot/Shopify
+  // forms) use: exact match against real providers passes; a name that's off
+  // by 1-2 letters gets flagged as a likely typo. Anything else (custom/business
+  // domains) is left alone, since those are legitimately valid.
+  const KNOWN_EMAIL_DOMAINS = [
+    'gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com',
+    'icloud.com', 'aol.com', 'protonmail.com', 'live.com',
+    'msn.com', 'yahoo.co.uk', 'ymail.com', 'gmx.com',
+  ];
+  const KNOWN_EMAIL_TLDS = ['com', 'net', 'org', 'ph', 'co', 'io'];
+
+  function levenshtein(a, b) {
+    const m = a.length, n = b.length;
+    const dp = Array.from({ length: m + 1 }, (_, i) => [i, ...Array(n).fill(0)]);
+    for (let j = 0; j <= n; j++) dp[0][j] = j;
+    for (let i = 1; i <= m; i++) {
+      for (let j = 1; j <= n; j++) {
+        dp[i][j] = a[i - 1] === b[j - 1]
+          ? dp[i - 1][j - 1]
+          : 1 + Math.min(dp[i - 1][j - 1], dp[i - 1][j], dp[i][j - 1]);
+      }
+    }
+    return dp[m][n];
+  }
+
+  function findTypoSuggestion(domain) {
+    let best = null, bestDist = Infinity;
+    for (const known of KNOWN_EMAIL_DOMAINS) {
+      const d = levenshtein(domain, known);
+      if (d < bestDist) { bestDist = d; best = known; }
+    }
+    return bestDist > 0 && bestDist <= 2 ? best : null;
+  }
+
   // Rules: each returns an error string, or '' if the field is valid
   const fieldRules = {
     first_name: () => contactForm.first_name.value.trim() ? '' : 'First name is required',
@@ -761,6 +808,16 @@ style="background: var(--gradient-gold)">
       const v = contactForm.email.value.trim();
       if (!v) return 'Email address is required';
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return 'Enter a valid email address, like name@example.com';
+
+      const domain = v.split('@')[1].toLowerCase();
+      if (KNOWN_EMAIL_DOMAINS.includes(domain)) return '';
+
+      const suggestion = findTypoSuggestion(domain);
+      if (suggestion) return `Did you mean @${suggestion}? Please check your email`;
+
+      const tld = domain.split('.').pop();
+      if (!KNOWN_EMAIL_TLDS.includes(tld)) return 'That email domain looks incorrect';
+
       return '';
     },
     phone: () => {
@@ -769,6 +826,9 @@ style="background: var(--gradient-gold)">
       return '';
     },
     budget: () => contactForm.budget.value ? '' : 'Please select a budget range',
+    preferred_color: () => contactForm.preferred_color.value ? '' : 'Please select a color',
+    pond_size: () => contactForm.pond_size.value ? '' : 'Please select a pond size',
+    delivery_province: () => contactForm.delivery_province.value.trim() ? '' : 'Delivery province is required',
     message: () => {
       const v = contactForm.message.value.trim();
       if (!v) return "Please tell us a little about your pond";
